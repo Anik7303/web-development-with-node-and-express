@@ -1,28 +1,32 @@
 const express = require('express')
 const expressHandlebars = require('express-handlebars')
 
+const fortune = require('./lib/fortune')
+
 const port = process.env.PORT || 3000
 const app = express();
 
+app.engine('handlebars', expressHandlebars({defaultLayout: 'main'}))
+app.set('view engine', 'handlebars')
+app.set('views', 'views')
+
 app.get('/', (req, res) => {
-  res.send('Home Page')
+  res.render('home')
 })
 
 app.get('/about', (req, res) => {
-  res.send('About Page')
+  res.render('about', { fortune: fortune.getFortune() })
 })
 
 app.use((req, res) => {
   res.status(404)
-  res.type('text/plain')
-  res.send('404 - Not Found')
+  res.render('404')
 })
 
 app.use((err, req, res, next) => {
   console.error(err.message)
-  res.type('text/plain')
   res.status(500)
-  res.send('500 - Sever Error')
+  res.render('500', {error: err})
 })
 
 app.listen(port, () => console.log(`server running on port ${port}. press 'CTRL + C' to terminate....`))
