@@ -1,33 +1,25 @@
 const express = require('express')
-const expressHandlebars = require('express-handlebars')
+const handlebars = require('express-handlebars')
 
-const fortune = require('./lib/fortune')
+// route handlers
+const handlers = require('./lib/handlers')
 
-const port = process.env.PORT || 3000
-const app = express();
+// variables
+const PORT = process.env.PORT || 3000
 
-app.engine('handlebars', expressHandlebars({defaultLayout: 'main'}))
+const app = express()
+
+// setting up handlebars view engine
+app.engine('handlebars', handlebars({ defaultLayout: 'main' }))
 app.set('view engine', 'handlebars')
 app.set('views', 'views')
 
-app.get('/', (req, res) => {
-  res.render('home')
-})
 
-app.get('/about', (req, res) => {
-  res.render('about', { fortune: fortune.getFortune() })
-})
+// routes
+app.get('/', handlers.home)
+app.get('/about', handlers.about)
+app.use(handlers.notFound)
+app.use(handlers.serverError)
 
-app.use((req, res) => {
-  res.status(404)
-  res.render('404')
-})
-
-app.use((err, req, res, next) => {
-  console.error(err.message)
-  res.status(500)
-  res.render('500', {error: err})
-})
-
-app.listen(port, () => console.log(`server running on port ${port}. press 'CTRL + C' to terminate....`))
+app.listen(PORT, () => console.log(`server running on port ${PORT}. press 'CTRL + C' to terminate....`))
 
